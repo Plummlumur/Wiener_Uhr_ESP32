@@ -101,6 +101,26 @@ MONTH_NAMES = [
 ]
 
 # =============================================================================
+# WiFi and NTP Time Configuration
+# =============================================================================
+WIFI_CONFIG = {
+    'enabled': True,                        # Enable WiFi connection
+    'ssid': 'YOUR_WIFI_SSID',              # Replace with your WiFi SSID
+    'password': 'YOUR_WIFI_PASSWORD',       # Replace with your WiFi password
+    'timeout': 10,                          # Connection timeout in seconds
+    'retry_interval': 60,                   # Retry connection interval in seconds
+}
+
+NTP_CONFIG = {
+    'enabled': True,                        # Enable NTP time synchronization
+    'server': 'pool.ntp.org',              # NTP server address
+    'timezone_offset': 1,                   # Timezone offset in hours (CET = UTC+1)
+    'dst_offset': 0,                        # Daylight saving time offset in hours
+    'sync_interval': 3600,                  # Sync interval in seconds (1 hour)
+    'sync_rtc': True,                       # Sync DS1302 RTC with NTP time
+}
+
+# =============================================================================
 # Pin Assignment Summary for Easy Reference
 # =============================================================================
 """
