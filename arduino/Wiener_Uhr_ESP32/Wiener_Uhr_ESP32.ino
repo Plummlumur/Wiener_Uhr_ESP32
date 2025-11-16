@@ -83,18 +83,38 @@ void setup() {
 
     // Print WiFi & NTP status
     wifiTime.printStatus();
+
+    // Give WiFi a moment to stabilize and free up some memory
+    Serial.println("\nWaiting for WiFi to stabilize...");
+    delay(1000);
   #else
     Serial.println("WiFi disabled in configuration");
   #endif
+
+  // Check available heap before display initialization
+  Serial.print("\nFree heap before display init: ");
+  Serial.print(ESP.getFreeHeap());
+  Serial.println(" bytes");
 
   // Initialize display AFTER WiFi to avoid conflicts
   Serial.println();
   if (!display.begin()) {
     Serial.println("ERROR: Display initialization failed!");
+    Serial.print("Free heap after failure: ");
+    Serial.print(ESP.getFreeHeap());
+    Serial.println(" bytes");
+    Serial.println("\nTroubleshooting:");
+    Serial.println("1. The display requires significant memory for DMA buffers");
+    Serial.println("2. Try disabling WiFi temporarily in config.h");
+    Serial.println("3. Check all pin connections");
     while (1) {
       delay(1000);
     }
   }
+
+  Serial.print("Free heap after display init: ");
+  Serial.print(ESP.getFreeHeap());
+  Serial.println(" bytes");
 
   // Show startup message
   String startupLines[] = {"Wiener", "Uhr", "Start..."};

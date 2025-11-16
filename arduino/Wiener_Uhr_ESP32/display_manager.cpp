@@ -36,17 +36,31 @@ bool DisplayManager::begin() {
   mxconfig.gpio.oe = OE_PIN;
   mxconfig.gpio.clk = CLK_PIN;
 
-  // WiFi-friendly configuration
-  // Use fewer DMA buffers to reduce memory usage and conflicts with WiFi
-  mxconfig.double_buff = true;  // Enable double buffering for smooth updates
-  mxconfig.clkphase = false;    // Better WiFi compatibility
+  // WiFi-friendly configuration with reduced memory usage
+  // CRITICAL: After WiFi init, memory is limited. Use minimal DMA buffers.
+  mxconfig.double_buff = false;  // Disable double buffering to save memory
+  mxconfig.clkphase = false;     // Better WiFi compatibility
+
+  // Reduce latch blanking to save memory (default is often too high)
+  mxconfig.latch_blanking = 1;   // Minimal blanking time
+
+  // Use minimal color depth to reduce memory (2-bit = 4 brightness levels per color)
+  mxconfig.min_refresh_rate = 60; // Reduce refresh rate slightly to save CPU
 
   // Create matrix instance
   matrix = new MatrixPanel_I2S_DMA(mxconfig);
 
+  // Check if allocation succeeded
+  if (!matrix) {
+    Serial.println("*** Failed to allocate matrix object ***");
+    return false;
+  }
+
   // Initialize matrix
   if (!matrix->begin()) {
     Serial.println("*** Matrix initialization failed ***");
+    delete matrix;
+    matrix = nullptr;
     return false;
   }
 
