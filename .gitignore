@@ -1,0 +1,41 @@
+# System and OS files
+System Volume Information/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# MicroPython/CircuitPython runtime files
+boot_out.txt
+.fseventsd/
+.Trashes/
+.TemporaryItems/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# IDE and editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# SD card contents (user data)
+sd/
+
+# Test files
+test_*.py
+temp/
+
+# Documentation build artifacts
+docs/_build/

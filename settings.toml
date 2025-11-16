@@ -1,0 +1,120 @@
+# CircuitPython Settings for Wiener Uhr (Viennese Clock)
+# =======================================================
+# This file contains configuration settings for the CircuitPython environment
+# and the Wiener Uhr clock application.
+
+# --------------------------------------------------------------
+# Display Settings
+# --------------------------------------------------------------
+[display]
+# LED Matrix brightness levels (0.0 to 1.0)
+brightness_day = 0.3        # Brightness during day hours (8:00-15:59)
+brightness_night = 0.15     # Brightness during night hours (0:00-7:59, 16:00-23:59)
+
+# Display update interval in seconds
+update_interval = 60        # How often to check for time changes (default: 60)
+
+# Text positioning on the 64x64 display
+text_x = 1                  # X coordinate for text start
+text_y = 8                  # Y coordinate for text start
+text_scale = 1              # Text scale factor (1 = normal size)
+line_spacing = 1.5          # Line spacing multiplier
+
+# Text color (24-bit RGB hex value)
+text_color = 0x000000       # Black text (default)
+
+# --------------------------------------------------------------
+# Time Display Settings
+# --------------------------------------------------------------
+[time]
+# Use alternative time phrases randomly (10, 20, 40, 50 minute marks)
+use_alternative_phrases = true
+
+# Night mode hours (when to use lower brightness)
+night_start_hour = 16       # Night mode starts at 16:00 (4 PM)
+night_end_hour = 8          # Night mode ends at 08:00 (8 AM)
+
+# --------------------------------------------------------------
+# RTC (Real-Time Clock) Settings
+# --------------------------------------------------------------
+[rtc]
+# DS1302 GPIO pin assignments
+clk_pin = "GP6"             # Clock pin
+dat_pin = "GP7"             # Data pin
+ce_pin = "GP14"             # Chip Enable/Reset pin
+
+# Trickle charge settings (ONLY use with rechargeable battery!)
+enable_trickle_charge = false   # Set to true ONLY if using rechargeable battery
+trickle_diodes = 1              # Number of diodes (1 or 2)
+trickle_resistor = 2            # Resistor: 0=none, 1=2k©, 2=4k©, 3=8k©
+
+# --------------------------------------------------------------
+# Background Images
+# --------------------------------------------------------------
+[background]
+# Enable monthly background images
+use_monthly_backgrounds = true
+
+# Path to background images directory
+image_path = "/"
+
+# Image file naming pattern (supports {month} placeholder)
+# Available months: januar, februar, maerz, april, mai, juni,
+#                   juli, august, september, oktober, november, dezember
+image_filename_pattern = "{month}_8bit.bmp"
+
+# --------------------------------------------------------------
+# Debug Settings
+# --------------------------------------------------------------
+[debug]
+# Enable debug output to console
+enable_debug = false
+
+# Print time updates to console
+print_time_updates = false
+
+# Print RTC status on startup
+print_rtc_status = true
+
+# --------------------------------------------------------------
+# Wi-Fi Settings (Optional - for future features)
+# --------------------------------------------------------------
+# Uncomment and configure if you want to add Wi-Fi connectivity
+# for time synchronization or remote control
+#
+# [wifi]
+# ssid = "YourNetworkName"
+# password = "YourPassword"
+# enable_ntp = false          # Network Time Protocol sync
+# ntp_server = "pool.ntp.org"
+
+# --------------------------------------------------------------
+# Advanced Settings
+# --------------------------------------------------------------
+[advanced]
+# RGB Matrix hardware configuration
+# (Only change if using different hardware setup)
+matrix_width = 64
+matrix_height = 64
+matrix_bit_depth = 6
+matrix_chain_width = 1
+matrix_chain_height = 1
+matrix_serpentine = true
+matrix_doublebuffer = true
+matrix_rotation = 180       # Display rotation in degrees (0, 90, 180, 270)
+
+# GPIO pins for RGB Matrix (Raspberry Pi Pico)
+# Uncomment to override default pin assignments
+# rgb_pins = ["GP2", "GP3", "GP4", "GP5", "GP8", "GP9"]
+# addr_pins = ["GP10", "GP16", "GP18", "GP20", "GP22"]
+# clock_pin = "GP11"
+# latch_pin = "GP12"
+# oe_pin = "GP13"
+
+# Font settings
+# font_path = "/lib/fonts/helvR12.bdf"
+# Available fonts in /lib/fonts/:
+# - helvR12.bdf (default)
+# - Junction-regular-24.bdf
+# - LeagueSpartan-Bold-16.bdf
+# - tahoma-12.bdf
