@@ -24,12 +24,15 @@ from config_esp32 import (
     BACKGROUND_CONFIG,
     MONTH_NAMES,
     MATRIX_WIDTH,
-    MATRIX_HEIGHT
+    MATRIX_HEIGHT,
+    WIFI_CONFIG,
+    NTP_CONFIG
 )
 from hub75_esp32 import HUB75Matrix
 from display_api import RGB_Api, DisplayManager
 from ds1302_esp32 import DS1302Helper
 from bdf_font import load_font
+from wifi_time import WiFiTimeManager
 
 
 # --------------------------------------------------------------
@@ -174,7 +177,21 @@ def setup_hardware():
     print("Wiener Uhr - ESP32 Version")
     print("=" * 50)
 
-    # Initialize RTC
+    # Initialize WiFi Time Manager
+    print("Initializing WiFi Time Manager...")
+    wifi_time = WiFiTimeManager(WIFI_CONFIG, NTP_CONFIG)
+
+    # Try to connect to WiFi if enabled
+    if WIFI_CONFIG.get('enabled', False):
+        if wifi_time.connect_wifi():
+            # Attempt initial NTP sync
+            wifi_time.sync_ntp()
+        else:
+            print("WiFi connection failed, will use DS1302 RTC only")
+    else:
+        print("WiFi disabled, using DS1302 RTC only")
+
+    # Initialize RTC (always initialize as fallback)
     print("Initializing DS1302 RTC...")
     rtc = DS1302Helper(
         clk_pin=DS1302_PINS['CLK'],
@@ -183,8 +200,16 @@ def setup_hardware():
     )
     print(f"RTC initialized. Current time: {rtc.get_formatted_datetime()}")
 
-    # Uncomment to set time (example):
+    # Sync RTC with NTP if WiFi is connected and sync_rtc is enabled
+    if wifi_time.is_connected() and NTP_CONFIG.get('sync_rtc', False):
+        print("Syncing DS1302 RTC with NTP time...")
+        wifi_time.sync_rtc_from_ntp(rtc)
+
+    # Uncomment to manually set time (example):
     # rtc.set_time(2025, 11, 16, 14, 30, 0)
+
+    # Print WiFi & NTP status
+    wifi_time.print_status()
 
     # Initialize RGB Matrix
     print("Initializing RGB Matrix...")
@@ -220,7 +245,7 @@ def setup_hardware():
     print("Hardware setup complete!")
     print("=" * 50)
 
-    return rtc, matrix, display_manager, rgb
+    return rtc, matrix, display_manager, rgb, wifi_time
 
 
 # --------------------------------------------------------------
@@ -230,11 +255,12 @@ def setup_hardware():
 def main():
     """Main program loop"""
     # Setup hardware
-    rtc, matrix, display_manager, rgb = setup_hardware()
+    rtc, matrix, display_manager, rgb, wifi_time = setup_hardware()
 
     # State tracking
     buffer = None
     last_update_time = 0
+    last_ntp_check_time = 0
     refresh_counter = 0
 
     print("Starting main loop...")
@@ -244,13 +270,31 @@ def main():
         display_manager.update()
         refresh_counter += 1
 
-        # Check if it's time to update the clock (every second, but only update text when needed)
-        current_time = time.ticks_ms()
-        if time.ticks_diff(current_time, last_update_time) >= 1000:
-            last_update_time = current_time
+        # Periodic NTP sync check (every 60 seconds)
+        current_tick = time.ticks_ms()
+        if time.ticks_diff(current_tick, last_ntp_check_time) >= 60000:
+            last_ntp_check_time = current_tick
 
-            # Get current time
-            comp = rtc.get_time_components()
+            # Check if NTP sync is needed
+            if wifi_time.should_sync():
+                print("Performing periodic NTP sync...")
+                if wifi_time.sync_ntp():
+                    # Sync RTC if configured
+                    if NTP_CONFIG.get('sync_rtc', False):
+                        wifi_time.sync_rtc_from_ntp(rtc)
+
+        # Check if it's time to update the clock (every second, but only update text when needed)
+        if time.ticks_diff(current_tick, last_update_time) >= 1000:
+            last_update_time = current_tick
+
+            # Get current time - use WiFi/NTP if available, otherwise use DS1302 RTC
+            if wifi_time.is_connected() and NTP_CONFIG.get('enabled', False):
+                comp = wifi_time.get_time_components()
+                time_source = "NTP"
+            else:
+                comp = rtc.get_time_components()
+                time_source = "RTC"
+
             Stunde = comp["hour"]
             Minute = comp["minute"]
             Monat = comp["month"]
@@ -266,7 +310,7 @@ def main():
 
             # Only update if text has changed
             if txt_lines != buffer:
-                print(f"Updating display: {' '.join(txt_lines)}")
+                print(f"Updating display [{time_source}]: {' '.join(txt_lines)}")
 
                 # Load monthly background
                 if BACKGROUND_CONFIG['use_monthly_backgrounds']:
