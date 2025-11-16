@@ -116,10 +116,11 @@ void setup() {
   Serial.print(ESP.getFreeHeap());
   Serial.println(" bytes");
 
-  // Show startup message
-  String startupLines[] = {"Wiener", "Uhr", "Start..."};
-  display.displayText(startupLines, 3, 0xFFFF);  // White text
-  delay(2000);
+  // Skip startup message due to potential text rendering conflicts with WiFi
+  // Just clear the display and start the clock
+  display.clear();
+  delay(500);
+  Serial.println("Display ready - starting clock...");
 
   // Initialize DS1302 RTC if enabled
   #if USE_DS1302
@@ -263,8 +264,14 @@ void loop() {
         display.setBrightness(BRIGHTNESS_DAY);
       }
 
+      // Yield to WiFi task before display update
+      yield();
+      delay(10);
+
       // Update display
+      Serial.println("Calling displayText...");
       display.displayText(lines, lineCount, TEXT_COLOR);
+      Serial.println("displayText complete");
 
       // Save current state
       lastDisplayedLineCount = lineCount;
@@ -274,6 +281,7 @@ void loop() {
     }
   }
 
-  // Small delay to prevent overwhelming the CPU
+  // Allow WiFi stack to process
+  yield();
   delay(10);
 }

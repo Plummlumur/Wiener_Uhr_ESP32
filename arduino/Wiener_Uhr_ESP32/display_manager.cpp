@@ -95,20 +95,28 @@ void DisplayManager::setBrightness(uint8_t brightness) {
 
 void DisplayManager::displayText(String lines[], int lineCount, uint16_t color) {
   if (!matrix) {
+    Serial.println("ERROR: Matrix not initialized in displayText");
     return;
   }
 
-  // Clear screen
+  if (lineCount <= 0 || lineCount > 10) {
+    Serial.println("ERROR: Invalid line count");
+    return;
+  }
+
+  // Clear screen first
   matrix->clearScreen();
 
   // Calculate starting Y position for centered text
   int totalHeight = lineCount * LINE_SPACING;
   int startY = (MATRIX_HEIGHT - totalHeight) / 2 + TEXT_Y_OFFSET;
 
-  // Draw each line
+  // Draw each line with error checking
   for (int i = 0; i < lineCount; i++) {
-    int y = startY + (i * LINE_SPACING);
-    drawCenteredText(lines[i], y, color);
+    if (lines[i].length() > 0) {
+      int y = startY + (i * LINE_SPACING);
+      drawCenteredText(lines[i], y, color);
+    }
   }
 
   // Update display
@@ -126,7 +134,12 @@ MatrixPanel_I2S_DMA* DisplayManager::getPanel() {
 
 void DisplayManager::drawCenteredText(String text, int y, uint16_t color) {
   if (!matrix) {
+    Serial.println("ERROR: Matrix null in drawCenteredText");
     return;
+  }
+
+  if (text.length() == 0) {
+    return;  // Nothing to draw
   }
 
   // Calculate text width (approximate, 6 pixels per character with default font)
@@ -135,13 +148,19 @@ void DisplayManager::drawCenteredText(String text, int y, uint16_t color) {
 
   // Ensure text stays within bounds
   if (x < 0) x = TEXT_X_OFFSET;
+  if (y < 0 || y >= MATRIX_HEIGHT) {
+    Serial.println("ERROR: Y position out of bounds");
+    return;
+  }
 
-  // Set text color
+  // Use const char* instead of String to avoid potential issues
+  const char* cstr = text.c_str();
+
+  // Set text properties with bounds checking
   matrix->setTextColor(color);
-
-  // Set cursor position
+  matrix->setTextWrap(false);
   matrix->setCursor(x, y);
 
-  // Draw text
-  matrix->print(text);
+  // Draw text using C string
+  matrix->print(cstr);
 }
