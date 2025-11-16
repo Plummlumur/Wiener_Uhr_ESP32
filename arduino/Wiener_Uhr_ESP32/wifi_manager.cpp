@@ -114,7 +114,7 @@ bool WiFiTimeManager::syncNTP() {
   struct tm timeinfo;
   int retries = 20;  // 20 * 500ms = 10 seconds
   while (retries > 0) {
-    if (getLocalTime(&timeinfo)) {
+    if (::getLocalTime(&timeinfo)) {
       lastNTPSync = millis();
       Serial.println("NTP synchronization successful!");
       Serial.print("Current time: ");
@@ -154,7 +154,7 @@ bool WiFiTimeManager::shouldSync() {
 bool WiFiTimeManager::getLocalTime(int& hour, int& minute, int& second,
                                      int& day, int& month, int& year) {
   struct tm timeinfo;
-  if (!getLocalTime(&timeinfo)) {
+  if (!::getLocalTime(&timeinfo)) {
     return false;
   }
 
@@ -170,7 +170,7 @@ bool WiFiTimeManager::getLocalTime(int& hour, int& minute, int& second,
 
 String WiFiTimeManager::getFormattedTime() {
   struct tm timeinfo;
-  if (!getLocalTime(&timeinfo)) {
+  if (!::getLocalTime(&timeinfo)) {
     return "Time not available";
   }
 
