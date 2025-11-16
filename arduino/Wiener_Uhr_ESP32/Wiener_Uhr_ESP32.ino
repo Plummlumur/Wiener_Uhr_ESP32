@@ -27,6 +27,12 @@
   #include <DS1302.h>
 #endif
 
+// Define MONTH_NAMES array (declared as extern in config.h)
+const char* MONTH_NAMES[12] = {
+  "januar", "februar", "maerz", "april", "mai", "juni",
+  "juli", "august", "september", "oktober", "november", "dezember"
+};
+
 // Global objects
 DisplayManager display;
 WiFiTimeManager wifiTime;

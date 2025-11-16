@@ -103,9 +103,6 @@
 // =============================================================================
 // Month Names (German)
 // =============================================================================
-const char* MONTH_NAMES[] = {
-  "januar", "februar", "maerz", "april", "mai", "juni",
-  "juli", "august", "september", "oktober", "november", "dezember"
-};
+extern const char* MONTH_NAMES[12];
 
 #endif // CONFIG_H
