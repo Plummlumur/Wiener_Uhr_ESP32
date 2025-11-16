@@ -36,6 +36,11 @@ bool DisplayManager::begin() {
   mxconfig.gpio.oe = OE_PIN;
   mxconfig.gpio.clk = CLK_PIN;
 
+  // WiFi-friendly configuration
+  // Use fewer DMA buffers to reduce memory usage and conflicts with WiFi
+  mxconfig.double_buff = true;  // Enable double buffering for smooth updates
+  mxconfig.clkphase = false;    // Better WiFi compatibility
+
   // Create matrix instance
   matrix = new MatrixPanel_I2S_DMA(mxconfig);
 

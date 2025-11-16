@@ -64,22 +64,10 @@ void setup() {
   Serial.println("==================================================");
   Serial.println();
 
-  // Initialize display
-  if (!display.begin()) {
-    Serial.println("ERROR: Display initialization failed!");
-    while (1) {
-      delay(1000);
-    }
-  }
-
-  // Show startup message
-  String startupLines[] = {"Wiener", "Uhr", "Start..."};
-  display.displayText(startupLines, 3, 0xFFFF);  // White text
-  delay(2000);
-
-  // Initialize WiFi if enabled
+  // IMPORTANT: Initialize WiFi BEFORE display to avoid DMA conflicts
+  // The HUB75 DMA display can interfere with WiFi initialization
   #if WIFI_ENABLED
-    Serial.println("\nInitializing WiFi...");
+    Serial.println("Initializing WiFi...");
     if (wifiTime.connectWiFi()) {
       // Attempt initial NTP sync
       if (NTP_ENABLED) {
@@ -98,6 +86,20 @@ void setup() {
   #else
     Serial.println("WiFi disabled in configuration");
   #endif
+
+  // Initialize display AFTER WiFi to avoid conflicts
+  Serial.println();
+  if (!display.begin()) {
+    Serial.println("ERROR: Display initialization failed!");
+    while (1) {
+      delay(1000);
+    }
+  }
+
+  // Show startup message
+  String startupLines[] = {"Wiener", "Uhr", "Start..."};
+  display.displayText(startupLines, 3, 0xFFFF);  // White text
+  delay(2000);
 
   // Initialize DS1302 RTC if enabled
   #if USE_DS1302
